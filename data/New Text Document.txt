@@ -1,0 +1,125 @@
+1. Email Scraper from Web Page
+java
+Copy
+Edit
+import java.util.regex.*;
+import java.io.*;
+import java.net.*;
+
+public class EmailScraper {
+    public static void main(String[] args) throws Exception {
+        URL url = new URL("https://example.com");
+        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+        String inputLine;
+        StringBuilder content = new StringBuilder();
+        while ((inputLine = in.readLine()) != null)
+            content.append(inputLine);
+        in.close();
+
+        Pattern emailPattern = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+        Matcher matcher = emailPattern.matcher(content);
+        while (matcher.find()) {
+            System.out.println("Email found: " + matcher.group());
+        }
+    }
+}
+2. Numeric Literals and Date Identifier from File
+java
+Copy
+Edit
+import java.util.regex.*;
+import java.io.*;
+
+public class DataExtractor {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("sample.txt"));
+        String line;
+        Pattern numberPattern = Pattern.compile("\\b\\d+(\\.\\d+)?\\b");
+        Pattern datePattern = Pattern.compile("\\b(\\d{2}[-/]\\d{2}[-/]\\d{4})\\b");
+
+        while ((line = reader.readLine()) != null) {
+            Matcher numMatch = numberPattern.matcher(line);
+            while (numMatch.find()) System.out.println("Number: " + numMatch.group());
+
+            Matcher dateMatch = datePattern.matcher(line);
+            while (dateMatch.find()) System.out.println("Date: " + dateMatch.group());
+        }
+        reader.close();
+    }
+}
+3. Password Strength Checker
+java
+Copy
+Edit
+import java.util.regex.*;
+
+public class PasswordChecker {
+    public static void main(String[] args) {
+        String password = "Example@123";
+
+        boolean length = password.length() >= 8;
+        boolean upper = Pattern.compile("[A-Z]").matcher(password).find();
+        boolean lower = Pattern.compile("[a-z]").matcher(password).find();
+        boolean digit = Pattern.compile("[0-9]").matcher(password).find();
+        boolean special = Pattern.compile("[^a-zA-Z0-9]").matcher(password).find();
+
+        int score = 0;
+        if (length) score++;
+        if (upper) score++;
+        if (lower) score++;
+        if (digit) score++;
+        if (special) score++;
+
+        String strength = (score == 5) ? "Strong" : (score >= 3) ? "Moderate" : "Weak";
+        System.out.println("Password strength: " + strength);
+    }
+}
+4. Regular Expression Demonstration
+java
+Copy
+Edit
+import java.util.regex.*;
+
+public class RegexDemo {
+    public static void main(String[] args) {
+        String input = "ID: abc_123, Phone: 987-654-3210, Range: 45, Email: test@mail.com";
+        String[] patterns = {
+            "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b",        // Identifiers
+            "\\b\\d{3}-\\d{3}-\\d{4}\\b",          // Phone numbers
+            "\\b([1-9][0-9]?|100)\\b",             // Numbers 1–100
+            "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}" // Emails
+        };
+
+        for (String p : patterns) {
+            Pattern pattern = Pattern.compile(p);
+            Matcher matcher = pattern.matcher(input);
+            while (matcher.find()) {
+                System.out.println("Match found: " + matcher.group());
+            }
+        }
+    }
+}
+5. C-like Tokenizer (Identifiers & Numeric Constants)
+java
+Copy
+Edit
+import java.util.regex.*;
+import java.io.*;
+
+public class CTokenizer {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("source.c"));
+        String line;
+        Pattern identifier = Pattern.compile("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b");
+        Pattern number = Pattern.compile("\\b\\d+(\\.\\d+)?\\b");
+
+        while ((line = reader.readLine()) != null) {
+            Matcher idMatch = identifier.matcher(line);
+            while (idMatch.find()) System.out.println("Identifier: " + idMatch.group());
+
+            Matcher numMatch = number.matcher(line);
+            while (numMatch.find()) System.out.println("Number: " + numMatch.group());
+        }
+        reader.close();
+    }
+}

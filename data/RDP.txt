@@ -1,0 +1,90 @@
+import java.util.*;
+
+public class RecursiveDescentParser {
+    private static List<String> tokens;
+    private static int index = 0;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter expression (use id for identifiers): ");
+        String input = sc.nextLine();
+        tokens = tokenize(input);
+        tokens.add("$");  // End marker
+
+        if (E() && tokens.get(index).equals("$")) {
+            System.out.println("Parsing successful: Input is valid.");
+        } else {
+            System.out.println("Parsing failed: Invalid input.");
+        }
+    }
+
+    // Tokenizer: splits input into valid tokens
+    private static List<String> tokenize(String input) {
+        input = input.replaceAll("\\(", " ( ")
+                     .replaceAll("\\)", " ) ")
+                     .replaceAll("\\+", " + ")
+                     .replaceAll("\\*", " * ");
+        return new ArrayList<>(Arrays.asList(input.trim().split("\\s+")));
+    }
+
+    // E → T E'
+    private static boolean E() {
+        if (T()) {
+            return Eprime();
+        }
+        return false;
+    }
+
+    // E' → + T E' | ε
+    private static boolean Eprime() {
+        if (match("+")) {
+            if (T()) {
+                return Eprime();
+            }
+            return false;
+        }
+        return true;  // ε
+    }
+
+    // T → F T'
+    private static boolean T() {
+        if (F()) {
+            return Tprime();
+        }
+        return false;
+    }
+
+    // T' → * F T' | ε
+    private static boolean Tprime() {
+        if (match("*")) {
+            if (F()) {
+                return Tprime();
+            }
+            return false;
+        }
+        return true;  // ε
+    }
+
+    // F → ( E ) | id
+    private static boolean F() {
+        if (match("(")) {
+            if (E()) {
+                return match(")");
+            }
+            return false;
+        } else if (match("id")) {
+            return true;
+        }
+        return false;
+    }
+
+    // Match and consume a token
+    private static boolean match(String expected) {
+        if (index < tokens.size() && tokens.get(index).equals(expected)) {
+            index++;
+            return true;
+        }
+        return false;
+    }
+}

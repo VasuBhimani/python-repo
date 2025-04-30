@@ -1,0 +1,64 @@
+import java.util.*;
+
+public class DFASimulator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input DFA parameters
+        System.out.print("Enter number of states: ");
+        int numStates = sc.nextInt();
+
+        System.out.print("Enter number of input symbols: ");
+        int numSymbols = sc.nextInt();
+
+        sc.nextLine(); // Consume newline
+        System.out.print("Enter input symbols (space separated): ");
+        String[] symbols = sc.nextLine().split(" ");
+
+        Map<String, Integer> symbolIndex = new HashMap<>();
+        for (int i = 0; i < numSymbols; i++) {
+            symbolIndex.put(symbols[i], i);
+        }
+
+        // Transition table
+        int[][] transition = new int[numStates][numSymbols];
+        System.out.println("Enter the transition table (next state for each input):");
+        for (int state = 0; state < numStates; state++) {
+            System.out.print("From state " + state + ": ");
+            for (int symbol = 0; symbol < numSymbols; symbol++) {
+                transition[state][symbol] = sc.nextInt();
+            }
+        }
+
+        // Accepting states
+        System.out.print("Enter number of accepting states: ");
+        int numAccepting = sc.nextInt();
+        Set<Integer> acceptingStates = new HashSet<>();
+        System.out.print("Enter accepting states (space separated): ");
+        for (int i = 0; i < numAccepting; i++) {
+            acceptingStates.add(sc.nextInt());
+        }
+
+        sc.nextLine(); // consume newline
+        System.out.print("Enter input string (space separated symbols): ");
+        String[] input = sc.nextLine().split(" ");
+
+        // Start from state 0
+        int currentState = 0;
+
+        for (String sym : input) {
+            if (!symbolIndex.containsKey(sym)) {
+                System.out.println("Invalid input symbol: " + sym);
+                return;
+            }
+            int index = symbolIndex.get(sym);
+            currentState = transition[currentState][index];
+        }
+
+        if (acceptingStates.contains(currentState)) {
+            System.out.println("The input string is ACCEPTED by the DFA.");
+        } else {
+            System.out.println("The input string is REJECTED by the DFA.");
+        }
+    }
+}

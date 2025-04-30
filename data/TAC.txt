@@ -1,0 +1,113 @@
+import java.util.*;
+
+class TACInstruction {
+    String result;   // The result variable where the operation's result is stored
+    String arg1;     // First operand (either a variable or a constant)
+    String operator; // Operator used (+, -, *, /)
+    String arg2;     // Second operand (either a variable or a constant)
+
+    // Constructor to initialize a TAC instruction
+    public TACInstruction(String result, String arg1, String operator, String arg2) {
+        this.result = result;
+        this.arg1 = arg1;
+        this.operator = operator;
+        this.arg2 = arg2;
+    }
+
+    // Method to represent the TAC instruction as a string
+    @Override
+    public String toString() {
+        if (operator == null) {
+            return result + " = " + arg1; // For assignment (e.g., a = b)
+        } else {
+            return result + " = " + arg1 + " " + operator + " " + arg2; // For operations (e.g., t1 = b + c)
+        }
+    }
+}
+
+public class TACGenerator {
+    static List<TACInstruction> instructions = new ArrayList<>();  // List to store TAC instructions
+    static int tempVarCount = 1;  // Counter for generating temporary variable names like t1, t2, etc.
+
+    public static void main(String[] args) {
+        // Scanner to take input from the user
+        Scanner sc = new Scanner(System.in);
+
+        // Asking the user to enter a simple arithmetic expression for assignment
+        System.out.println("Enter an expression (e.g., a = b + c * d):");
+        String input = sc.nextLine().replaceAll("\\s+", "");  // Remove any spaces from the input
+
+        // Split the input into left-hand side (LHS) and right-hand side (RHS) of the assignment
+        String[] parts = input.split("=");
+        String lhs = parts[0];  // Left-hand side (e.g., 'a')
+        String rhs = parts[1];  // Right-hand side (e.g., 'b + c * d')
+
+        // Generate TAC for the right-hand side expression
+        String result = generateTAC(rhs);
+
+        // Store the final assignment in the instructions list
+        instructions.add(new TACInstruction(lhs, result, null, null));
+
+        // Output the generated TAC instructions
+        System.out.println("\nGenerated Three Address Code (TAC):");
+        for (TACInstruction instr : instructions) {
+            System.out.println(instr);
+        }
+
+        // Convert the list of instructions into an array and print the array contents
+        System.out.println("\nTAC Stored in Array:");
+        TACInstruction[] tacArray = instructions.toArray(new TACInstruction[0]);
+        for (int i = 0; i < tacArray.length; i++) {
+            System.out.println("tacArray[" + i + "] = " + tacArray[i]);
+        }
+    }
+
+    // This function generates the TAC for an expression (e.g., 'b + c * d')
+    private static String generateTAC(String expr) {
+        // Base case: If the expression is just a variable or a number, return it as it is
+        if (!expr.contains("+") && !expr.contains("-") && !expr.contains("*") && !expr.contains("/")) {
+            return expr;  // Return the expression as it is (no need for TAC generation)
+        }
+
+        // Remove parentheses first
+        int open = expr.lastIndexOf('(');
+        while (open != -1) {
+            int close = expr.indexOf(')', open);
+            String sub = expr.substring(open + 1, close);
+            String temp = generateTAC(sub);  // Recursively generate TAC for sub-expressions
+            expr = expr.substring(0, open) + temp + expr.substring(close + 1);
+            open = expr.lastIndexOf('(');
+        }
+
+        // Handle operations by precedence: Start with "*" and "/" (higher precedence), then "+" and "-"
+        String[] ops = {"*", "/", "+", "-"};
+        for (String op : ops) {
+            int i = findOperator(expr, op);  // Find the operator position
+            if (i != -1) {  // If an operator is found
+                String left = expr.substring(0, i);    // Left operand
+                String right = expr.substring(i + 1);  // Right operand
+                String t1 = generateTAC(left);  // Recursively generate TAC for the left operand
+                String t2 = generateTAC(right); // Recursively generate TAC for the right operand
+                String temp = "t" + tempVarCount++;  // Generate a temporary variable name (e.g., t1, t2, ...)
+                instructions.add(new TACInstruction(temp, t1, op, t2));  // Add TAC instruction to the list
+                return temp;  // Return the temporary variable holding the result
+            }
+        }
+
+        return expr;  // If no operator is found, return the expression (base case)
+    }
+
+    // This function finds the operator in the expression, skipping over parentheses
+    private static int findOperator(String expr, String op) {
+        int parens = 0;
+        for (int i = expr.length() - 1; i >= 0; i--) {
+            char c = expr.charAt(i);
+            if (c == ')') parens++;  // Handle closing parentheses
+            else if (c == '(') parens--;  // Handle opening parentheses
+            else if (parens == 0 && String.valueOf(c).equals(op)) {
+                return i;  // Return the index of the operator
+            }
+        }
+        return -1;  // Return -1 if no operator is found
+    }
+}
